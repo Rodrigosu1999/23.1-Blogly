@@ -1,0 +1,61 @@
+body{
+    background-color: whitesmoke;
+    font-family: 'Poppins', sans-serif;
+}
+
+h1{
+    font-size: 3rem;
+}
+
+nav{
+    font-size: 4rem;
+}
+
+/* Style for list items and Blogly anchor tags */
+a{
+    text-decoration: none;
+    color: black;
+}
+
+img{
+    width: 15%;
+}
+
+
+
+ul{
+    list-style-type: square;
+}
+
+/* Styles for form sections of the app (edit and create user) */
+form{
+    display: inline-block;
+}
+
+label{
+    display: block;
+    margin: 5px;
+}
+
+button {
+    border: none;
+    margin: 5px;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+  }
+
+.edit, .add_user, .save{
+    background-color: rgb(67, 144, 67);
+}
+
+.delete, .cancel{
+    background-color: rgb(214, 82, 82);
+}
+
+.cancel_form{
+    display: block;
+}

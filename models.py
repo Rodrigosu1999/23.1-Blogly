@@ -1,5 +1,5 @@
-from email.policy import default
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 db = SQLAlchemy()
 
@@ -30,3 +30,25 @@ class User(db.Model):
         """Get user full name."""
 
         return f"{self.first_name} {self.last_name}"
+
+
+class Post(db.Model):
+    """Posts Model."""
+
+    __tablename__ = "posts"
+
+    id = db.Column(db.Integer,
+                   primary_key=True,
+                   autoincrement=True)
+    title = db.Column(db.String(30),
+                      nullable=False,)
+    content = db.Column(db.String(150),
+                        nullable=False,)
+    created_at = db.Column(db.DateTime)
+    users_id = db.Column(db.Integer,
+                         db.ForeignKey('users.id', ondelete='CASCADE'),
+                         nullable=False
+                         )
+
+    user = db.relationship('User', backref=db.backref(
+        'posts', passive_deletes=True))

@@ -1,0 +1,18 @@
+{% extends 'base.html' %} {% block title %} Create Post {% endblock %} {% block
+content %}
+<h1>Add post for {{user.get_full_name()}}</h1>
+<form action="/users/{{user.id}}/posts/new" method="POST">
+  <label for="title"
+    >Title
+    <input type="text" name="title" />
+  </label>
+  <label for="content"
+    >Content
+    <input type="text" name="content" />
+  </label>
+  <button class="save">Save</button>
+</form>
+<form action="/users/{{user.id}}" method="GET" class="cancel_form">
+  <button class="cancel">Cancel</button>
+</form>
+{% endblock %}

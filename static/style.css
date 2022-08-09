@@ -8,6 +8,10 @@ h1{
 }
 
 nav{
+    font-size: 2rem;
+}
+
+.title{
     font-size: 4rem;
 }
 
@@ -27,7 +31,7 @@ ul{
     list-style-type: square;
 }
 
-/* Styles for form sections of the app (edit and create user) */
+/* Styles for form sections of the app (edit and create user/post) */
 form{
     display: inline-block;
 }
@@ -58,4 +62,8 @@ button {
 
 .cancel_form{
     display: block;
+}
+
+.return{
+    background-color: cornflowerblue;
 }

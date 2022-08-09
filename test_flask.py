@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from app import app
-from models import db, User
+from models import db, User, Post
 
 # Use test database and don't clutter tests with SQL
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///sqla_users_23-1_test'
@@ -17,13 +17,14 @@ db.drop_all()
 db.create_all()
 
 
-class PetViewsTestCase(TestCase):
+class UserPostTestCase(TestCase):
     """Tests for routes of blogly app."""
 
     def setUp(self):
         """Add sample user."""
 
         User.query.delete()
+        Post.query.delete()
 
         user = User(first_name="Test", last_name="Name")
         db.session.add(user)
@@ -31,19 +32,26 @@ class PetViewsTestCase(TestCase):
 
         self.user_id = user.id
 
+        post = Post(title="Test Post", content="Test post content",
+                    created_at="08/09/22 02:35:5.523", users_id=user.id)
+        db.session.add(post)
+        db.session.commit()
+
+        self.post_id = post.id
+
     def tearDown(self):
         """Clean up any fouled transaction."""
 
         db.session.rollback()
 
-    def test_root_redirect(self):
-        """Testing for the root route to redirect into /users"""
+    def test_homepage(self):
+        """Testing for the root route to display posts"""
         with app.test_client() as client:
-            resp = client.get("/", follow_redirects=True)
+            resp = client.get("/")
             html = resp.get_data(as_text=True)
 
             self.assertEqual(resp.status_code, 200)
-            self.assertIn('Users', html)
+            self.assertIn('Test Post', html)
 
     def test_show_user(self):
         """Testing for the users image and buttons to display as long as id is correct"""
@@ -53,7 +61,7 @@ class PetViewsTestCase(TestCase):
 
             self.assertEqual(resp.status_code, 200)
             self.assertIn('<h1>Test Name</h1>', html)
-            self.assertIn('<button>Edit</button>', html)
+            self.assertIn(' <button class="edit">Edit</button>', html)
 
     def test_edit_user_get_request(self):
         """Testing for the edit form to display"""
@@ -64,7 +72,7 @@ class PetViewsTestCase(TestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertIn('<h1>Edit a user</h1>', html)
             self.assertIn('<input type="text" name="image_url" />', html)
-            self.assertIn('<button>Cancel</button>', html)
+            self.assertIn('<button class="cancel">Cancel</button>', html)
 
     def test_edit_user_post_request(self):
         """Testing for the post request to edit a user and change the data in our database"""
@@ -79,7 +87,7 @@ class PetViewsTestCase(TestCase):
 
             self.assertEqual(resp.status_code, 200)
             self.assertIn('<h1>New Name</h1>', html)
-            self.assertIn('<button>Edit</button>', html)
+            self.assertIn(' <button class="edit">Edit</button>', html)
 
     def test_create_user_get_request(self):
         """Testing for the create user form to display"""
@@ -90,7 +98,7 @@ class PetViewsTestCase(TestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertIn('<h1>Create a user</h1>', html)
             self.assertIn('<form action="/users/new" method="POST">', html)
-            self.assertIn('<button>Cancel</button>', html)
+            self.assertIn('<button class="cancel">Cancel</button>', html)
 
     def test_create_user_post_request(self):
         """Testing for the create user post request to insert a new user into our database and update the user's listdisplayed"""
@@ -106,3 +114,44 @@ class PetViewsTestCase(TestCase):
             self.assertIn('<h1>Users</h1>', html)
             self.assertIn('Second User', html)
             self.assertIn('Add user', html)
+
+    def test_create_post_get_request(self):
+        """Testing for the create post form to     display"""
+        with app.test_client() as client:
+            resp = client.get(f"/users/{self.user_id}/posts/new")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Add post for Test Name',     html)
+            self.assertIn(
+                f'<form action="/users/{self.user_id}/posts/new" method="POST">', html)
+            self.assertIn('<button class="cancel">Cancel</button>', html)
+
+    def test_create_post_post_request(self):
+        """Testing for the create post POST request to insert a new post into our database and update the user's  posts list displayed"""
+
+        data = {'title': 'Second Post', 'content': 'Second test post'}
+
+        with app.test_client() as client:
+            resp = client.post(
+                f"/users/{self.user_id}/posts/new", data=data, follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('<h1>Test Name</h1>', html)
+            self.assertIn('Test Post', html)
+            self.assertIn('Second Post', html)
+
+    def test_view_post(self):
+        """Testing for a specific post to be displayed"""
+        with app.test_client() as client:
+            resp = client.get(f"/posts/{self.post_id}")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Test Post',     html)
+            self.assertIn(
+                'Return', html)
+            self.assertIn('Test post content', html)
+            self.assertIn('Posted by Test Name on', html)
+            self.assertIn(' 08-09-22 02:05 AM', html)

@@ -10,6 +10,20 @@ content %}
     >Content
     <input type="text" name="content" />
   </label>
+  <div class="check">
+    {% for tag in tags %}
+    <div>
+      <input
+        class="tag_check"
+        type="checkbox"
+        value="{{ tag.id }}"
+        id="tag_{{ tag.id }}"
+        name="tags"
+      />
+      <label class="check_label" for="tag_{{ tag.id }}"> {{ tag.name }} </label>
+    </div>
+    {% endfor %}
+  </div>
   <button class="save">Save</button>
 </form>
 <form action="/users/{{user.id}}" method="GET" class="cancel_form">

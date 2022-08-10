@@ -8,6 +8,14 @@ block content %}
     {{post.created_at.strftime("%m-%d-%y %H:%S %p")}}</i
   >
 </p>
+<div>
+  <span>Tags:</span>
+  {% for tag in tags %}
+  <form action="/tags/{{tag.id}}">
+    <button class="tag">{{tag.name}}</button>
+  </form>
+  {% endfor %}
+</div>
 <form action="/users/{{post.user.id}}">
   <button class="return">Return</button>
 </form>

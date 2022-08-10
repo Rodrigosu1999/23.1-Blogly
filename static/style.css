@@ -52,7 +52,7 @@ button {
     font-size: 16px;
   }
 
-.edit, .add_user, .save{
+.edit, .add_user, .save, .create{
     background-color: rgb(67, 144, 67);
 }
 
@@ -66,4 +66,15 @@ button {
 
 .return{
     background-color: cornflowerblue;
+}
+
+.tag{
+    font-size: 13px;
+    padding: 5px 10px;
+    border-radius: 3px;
+    background-color: rgb(131, 172, 225);
+}
+
+.check_label{
+    display: inline-block;
 }

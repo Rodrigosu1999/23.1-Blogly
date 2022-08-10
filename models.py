@@ -52,3 +52,41 @@ class Post(db.Model):
 
     user = db.relationship('User', backref=db.backref(
         'posts', passive_deletes=True))
+
+    post_tag = db.relationship('PostTag', backref=db.backref(
+        'posts', passive_deletes=True))
+
+    tags = db.relationship('Tag', secondary='post_tag', backref='posts')
+
+
+class Tag(db.Model):
+    """Tag Model."""
+
+    __tablename__ = "tags"
+
+    id = db.Column(db.Integer,
+                   primary_key=True,
+                   autoincrement=True)
+    name = db.Column(db.String(15),
+                     nullable=False,)
+
+    post_tag = db.relationship('PostTag', backref=db.backref(
+        'tags', passive_deletes=True))
+
+
+class PostTag(db.Model):
+    """PostTag Model. (Many-to-Many relationship)"""
+
+    __tablename__ = "post_tag"
+
+    post_id = db.Column(db.Integer,
+                        db.ForeignKey('posts.id', ondelete='CASCADE'),
+                        primary_key=True,
+                        nullable=False
+                        )
+
+    tag_id = db.Column(db.Integer,
+                       db.ForeignKey('tags.id', ondelete='CASCADE'),
+                       primary_key=True,
+                       nullable=False
+                       )

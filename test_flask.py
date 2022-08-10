@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from app import app
-from models import db, User, Post
+from models import db, User, Post, Tag, PostTag
 
 # Use test database and don't clutter tests with SQL
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///sqla_users_23-1_test'
@@ -25,6 +25,8 @@ class UserPostTestCase(TestCase):
 
         User.query.delete()
         Post.query.delete()
+        Tag.query.delete()
+        PostTag.query.delete()
 
         user = User(first_name="Test", last_name="Name")
         db.session.add(user)
@@ -38,6 +40,17 @@ class UserPostTestCase(TestCase):
         db.session.commit()
 
         self.post_id = post.id
+
+        tag = Tag(name="Testag")
+        db.session.add(tag)
+        db.session.commit()
+
+        self.tag_id = tag.id
+
+        post_tag = PostTag(post_id=post.id,
+                           tag_id=tag.id)
+        db.session.add(post_tag)
+        db.session.commit()
 
     def tearDown(self):
         """Clean up any fouled transaction."""
@@ -155,3 +168,77 @@ class UserPostTestCase(TestCase):
             self.assertIn('Test post content', html)
             self.assertIn('Posted by Test Name on', html)
             self.assertIn(' 08-09-22 02:05 AM', html)
+
+    def test_view_tag_list(self):
+        """Testing for tag list to be displayed"""
+        with app.test_client() as client:
+            resp = client.get(f"/tags")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Testag',     html)
+            self.assertIn(
+                'Create tag', html)
+            self.assertIn('Tags', html)
+
+    def test_view_tag(self):
+        """Testing for a specific tag to be displayed"""
+        with app.test_client() as client:
+            resp = client.get(f"/tags/{self.tag_id}")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Testag',     html)
+            self.assertIn(
+                'Edit', html)
+            self.assertIn('Delete', html)
+
+    def test_create_tag(self):
+        """Testing for the create tag form to be displayed"""
+        with app.test_client() as client:
+            resp = client.get(f"/tags/new")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Create a new tag!',     html)
+            self.assertIn('Name', html)
+            self.assertIn('Save', html)
+
+    def test_create_tag_post_request(self):
+        """Testing for the create tag POST request to insert a new tag into our database and update the tag's list displayed (including previous data)"""
+
+        data = {'name': 'Second Tag'}
+
+        with app.test_client() as client:
+            resp = client.post(
+                f"/tags/new", data=data, follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Second Tag', html)
+            self.assertIn('Testag', html)
+
+    def test_edit_tag(self):
+        """Testing for the edit tag form to be displayed"""
+        with app.test_client() as client:
+            resp = client.get(f"/tags/{self.tag_id}/edit")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Edit "Testag"',     html)
+            self.assertIn('Name', html)
+            self.assertIn('Save', html)
+
+    def test_edit_tag_post_request(self):
+        """Testing for the edit tag POST request to modify a tag from  our database"""
+
+        data = {'name': 'Changed Tag'}
+
+        with app.test_client() as client:
+            resp = client.post(
+                f"/tags/{self.tag_id}/edit", data=data, follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Changed Tag', html)
+            self.assertIn('Edit', html)
